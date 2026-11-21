@@ -142,7 +142,7 @@ body.done #stage{opacity:.35}
     <button id="replay">Intro</button>
     <button id="music" aria-pressed="true" aria-label="Música">♪ sí</button>
   </div>
-  <p class="hint ui">Llega justo a la cifra. Rodar suma la cara de arriba. <b>Combo</b>: dos números juntos se suman; dos números tocando un dado naranja hacen su operación. Pierdes si te pasas o te quedas sin pasos.</p>
+  <p class="hint ui">Llega justo a la cifra. Rodar suma la cara de arriba. <b>Combo</b>: dos números juntos se suman; dos números tocando un dado naranja hacen su operación. Empujar otro dado gasta 2 pasos. Pierdes si te pasas o te quedas sin pasos.</p>
 </main>
   <div id="result" hidden><div class="card"><div id="rTitle"></div><div id="rStars"></div><p id="rText"></p>
     <div class="bar"><button id="rRetry">Reintentar</button><button id="rMenu">Niveles</button><button id="rNext" class="pri">Siguiente</button></div></div></div>
@@ -255,12 +255,13 @@ async function move(d,dir){
   if(!inside(nx,ny)){bump(d);$('last').textContent='¡Borde!';return}
   const other=at(nx,ny);
   if(other&&(!inside(nx+dx,ny+dy)||at(nx+dx,ny+dy))){bump(d);bump(other);$('last').textContent='Bloqueado';return}
+  if(other&&moves+2>limit){bump(d);bump(other);$('last').textContent='Empujar gasta 2 pasos';return}
   busy=true;
   const movedIds=[d.id];
   if(other){movedIds.push(other.id);await Promise.all([roll(other,dir),roll(d,dir)])}
   else await roll(d,dir);
   const r=evaluate(dice,movedIds,d.id);
-  score+=r.total;moves++;
+  score+=r.total;moves+=other?2:1; // empujar gasta 2 pasos
   const L=$('last');L.classList.remove('combo');
   if(r.combos.length){
     void L.offsetWidth;L.classList.add('combo');
