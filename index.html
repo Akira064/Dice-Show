@@ -23,9 +23,9 @@
    LAYOUT: marcador arriba, tablero grande, controles abajo; la intro ocupa la pantalla */
 :root{color-scheme:dark;--bg:#03040b;--cy:#2de2ff;--cy2:#2de2ff55;--or:#ff8a1f;--ink:#e8fbff;--s:60px;--H:300px}
 *{box-sizing:border-box;min-width:0}
-html,body{height:100%}
+html,body{height:100%;overflow:hidden}
 body{margin:0;background:radial-gradient(120% 70% at 50% 45%,#0a1030,var(--bg) 70%);color:var(--ink);font:16px/1.5 Rubik,system-ui,sans-serif;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none}
-main{position:relative;z-index:0;transform-style:flat;display:flex;flex-direction:column;align-items:center;height:100%;padding:max(16px,env(safe-area-inset-top)) 16px 16px;gap:8px}
+main{position:relative;z-index:0;transform-style:flat;overflow:hidden;display:flex;flex-direction:column;align-items:center;height:100%;padding:max(16px,env(safe-area-inset-top)) 16px 16px;gap:8px}
 .ui{position:relative;z-index:1;transition:opacity .8s}
 body.intro .ui{opacity:0;pointer-events:none}
 .hud{display:flex;align-items:flex-end;justify-content:space-between;width:min(100%,520px)}
@@ -92,16 +92,16 @@ body.played #floor{opacity:.45}
 button{font:700 13px Orbitron,sans-serif;letter-spacing:.03em;min-height:44px;padding:0 18px;border-radius:22px;border:1.5px solid var(--cy);background:#2de2ff12;color:var(--ink);cursor:pointer;box-shadow:0 0 10px #2de2ff44}
 button:focus-visible{outline:2px solid var(--or);outline-offset:2px}
 .hint{font-size:13px;opacity:.7;text-align:center;max-width:420px;margin:0}
-#start{position:fixed;inset:0;z-index:8;border:0;border-radius:0;box-shadow:none;background:radial-gradient(60% 50% at 50% 50%,#0a103099,#03040bee);display:grid;place-content:center;gap:18px;text-align:center;cursor:pointer}
+#start{position:fixed;inset:0;z-index:20;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;background:radial-gradient(60% 50% at 50% 50%,#0a103099,#03040bee);gap:18px;text-align:center;cursor:pointer}
 #start span{font:900 clamp(30px,9vw,54px)/1 Orbitron,sans-serif;color:#eaffff;text-shadow:0 0 8px var(--cy),0 0 26px var(--cy)}
 #start b{font:700 14px Orbitron,sans-serif;color:var(--or);text-shadow:0 0 8px var(--or);animation:blink 1.4s ease-in-out infinite}
 @keyframes blink{50%{opacity:.35}}
 #start[hidden]{display:none}
-#skip{position:fixed;top:max(14px,env(safe-area-inset-top));right:14px;z-index:6;min-height:36px;font-size:11px;transition:opacity .4s}
+#skip{z-index:15;position:fixed;top:max(14px,env(safe-area-inset-top));right:14px;min-height:36px;font-size:11px;transition:opacity .4s}
 body:not(.intro) #skip{opacity:0;pointer-events:none}
-#result{position:fixed;inset:0;display:grid;place-items:center;background:#000a;z-index:5;padding:20px;transform:translateZ(2000px)}
+#result{position:fixed;inset:0;display:grid;place-items:center;background:#000a;z-index:10;padding:20px}
 #result[hidden],#menu[hidden]{display:none}
-#menu{position:fixed;inset:0;display:grid;place-items:center;background:#000a;z-index:5;padding:16px;transform:translateZ(2000px)}
+#menu{position:fixed;inset:0;display:grid;place-items:center;background:#000a;z-index:10;padding:16px}
 .card.wide{width:min(100%,420px);max-height:100%;overflow:auto}
 .mt{font:900 24px/1.15 Orbitron,sans-serif;color:var(--cy);text-shadow:0 0 12px var(--cy)}
 #mTotal{font:700 16px Orbitron,sans-serif;color:var(--or);text-shadow:0 0 8px var(--or);margin-top:4px}
@@ -118,6 +118,8 @@ body.done #stage{opacity:.35}
 .card p{margin:0 0 16px}
 .card [hidden]{display:none}
 .card button.pri{border-color:var(--or);background:#ff8a1f22;box-shadow:0 0 12px #ff8a1f66}
+@media(max-height:760px){.hint{display:none}}
+@media(max-width:400px){.bar button{padding:0 12px;font-size:12px}.bar{gap:7px}}
 @media(prefers-reduced-motion:reduce){.pop span{animation-duration:.01s}.crowd .p{animation:none}}
 </style>
 </head>
@@ -138,15 +140,16 @@ body.done #stage{opacity:.35}
     <button id="retry">Reintentar</button>
     <button id="next">Niveles</button>
     <button id="replay">Intro</button>
-    <button id="music" aria-pressed="true">Música: sí</button>
+    <button id="music" aria-pressed="true" aria-label="Música">♪ sí</button>
   </div>
   <p class="hint ui">Llega justo a la cifra. Rodar suma la cara de arriba. <b>Combo</b>: dos números juntos se suman; dos números tocando un dado naranja hacen su operación. Pierdes si te pasas o te quedas sin pasos.</p>
+</main>
   <div id="result" hidden><div class="card"><div id="rTitle"></div><div id="rStars"></div><p id="rText"></p>
     <div class="bar"><button id="rRetry">Reintentar</button><button id="rMenu">Niveles</button><button id="rNext" class="pri">Siguiente</button></div></div></div>
   <div id="menu" hidden><div class="card wide"><div id="rTitle2" class="mt">NIVELES</div><div id="mTotal"></div><div class="grid" id="grid"></div><button id="mClose">Seguir jugando</button></div></div>
-</main>
+
 <button id="skip">Saltar intro</button>
-<button id="start" aria-label="Empezar"><span>JUST DICE SHOW</span><b>Toca para empezar</b></button>
+<div id="start" role="button" tabindex="0" aria-label="Empezar"><span>JUST DICE SHOW</span><b>Toca para empezar</b></div>
 <script>
 {
 
@@ -452,7 +455,7 @@ const Music=(()=>{
     hide(){if(ctx&&timer)ctx.suspend()}, show(){if(ctx&&timer&&on)ctx.resume()}
   };
 })();
-const musicBtn=()=>{$('music').textContent='Música: '+(Music.on?'sí':'no');$('music').setAttribute('aria-pressed',Music.on)};
+const musicBtn=()=>{$('music').textContent='♪ '+(Music.on?'sí':'no');$('music').setAttribute('aria-pressed',Music.on)};
 musicBtn();
 $('music').onclick=()=>{Music.toggle();musicBtn()};
 document.addEventListener('visibilitychange',()=>document.hidden?Music.hide():Music.show());
