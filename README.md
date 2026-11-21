@@ -23,4 +23,5 @@ Desde el móvil se puede instalar como app («Añadir a pantalla de inicio») y 
 
 ## APK para Android
 
-Con la web publicada, en [pwabuilder.com](https://www.pwabuilder.com) pega la dirección y elige *Package for stores → Android*.
+Cada vez que cambia el juego, GitHub Actions compila el APK (carpeta `android/`) y lo publica en
+[Releases](https://github.com/Akira064/Dice-Show/releases/latest): descarga `JustDiceShow.apk` desde el móvil e instálalo.

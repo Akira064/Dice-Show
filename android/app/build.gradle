@@ -1,0 +1,17 @@
+plugins { id "com.android.application" }
+
+android {
+    namespace "io.github.akira064.diceshow"
+    compileSdk 34
+    defaultConfig {
+        applicationId "io.github.akira064.diceshow"
+        minSdk 24
+        targetSdk 34
+        versionCode (System.getenv("GITHUB_RUN_NUMBER") ?: "1").toInteger()
+        versionName "1." + (System.getenv("GITHUB_RUN_NUMBER") ?: "0")
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
