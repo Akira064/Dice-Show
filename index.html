@@ -368,7 +368,7 @@ $('grid').onclick=e=>{const b=e.target.closest('.lv');if(b&&!b.disabled)startLev
 
 /* ---------- plató: público ---------- */
 const world=$('world');
-let introOn=false, anim=null, signAnim=null;
+let introOn=false, anim=null, signAnim=null, crowdAnims=[];
 function buildCrowd(){
   const cols=['#2de2ff','#ff8a1f','#ff4fd8','#7cff6b'];
   // [x, y (línea de base), ancho, altura de grada, mira al norte] en casillas; el tablero va de 0 a 5
@@ -469,7 +469,7 @@ function playIntro(){
     {offset:.5,transform:`translate3d(0,20px,${SZ+60}px) rotateX(84deg)`,easing:'ease-in-out'},
     {offset:.72,transform:'translate3d(0,0,-900px) rotateX(58deg)',easing:'ease-in-out'},
     {offset:1,transform:'translate3d(0,0,0) rotateX(34deg)'}],{duration:D});
-  document.querySelectorAll('.crowd').forEach(c=>c.animate([{opacity:0},{opacity:0,offset:.47},{opacity:1,offset:.56},{opacity:1}],{duration:D}));
+  crowdAnims=[...document.querySelectorAll('.crowd')].map(c=>c.animate([{opacity:0},{opacity:0,offset:.47},{opacity:1,offset:.56},{opacity:1}],{duration:D}));
   signAnim=$('sign').animate([{opacity:1,visibility:'visible'},{opacity:1,visibility:'visible',offset:.42},{opacity:0,visibility:'visible',offset:.46},{opacity:0,visibility:'hidden',offset:.47},{opacity:0,visibility:'hidden'}],{duration:D});
   anim.onfinish=endIntro;
   Music.setDrums(false);
@@ -479,7 +479,7 @@ function endIntro(){
   introOn=false;document.body.classList.remove('intro');document.body.classList.add('played');
   Music.setDrums(true);
 }
-$('skip').onclick=()=>{if(anim)anim.finish();if(signAnim)signAnim.finish();endIntro()};
+$('skip').onclick=()=>{if(anim)anim.finish();if(signAnim)signAnim.finish();crowdAnims.forEach(a=>a.cancel());endIntro()};
 $('replay').onclick=playIntro;
 
 let st=null;
