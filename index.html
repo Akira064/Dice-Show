@@ -43,28 +43,26 @@ body.intro .ui{opacity:0;pointer-events:none}
 /* escena 3D: la cámara es #world */
 #stage{position:relative;z-index:0;flex:1;width:100%;display:grid;place-items:center;perspective:1000px;perspective-origin:50% 20%}
 #world{position:relative;width:var(--H);height:var(--H);transform-style:preserve-3d;transform:rotateX(34deg)}
-#floor{pointer-events:none;position:absolute;left:calc(var(--H)*-4);top:calc(var(--H)*-4);width:calc(var(--H)*9);height:calc(var(--H)*9);transform:translateZ(-2px);
-  background-image:linear-gradient(#2de2ff30 1.5px,transparent 1.5px),linear-gradient(90deg,#2de2ff30 1.5px,transparent 1.5px);background-size:var(--s) var(--s);background-position:calc(var(--H)*4) calc(var(--H)*4);
-  -webkit-mask:radial-gradient(closest-side,#000 25%,transparent);mask:radial-gradient(closest-side,#000 25%,transparent);transition:opacity 1s}
+#floor{pointer-events:none;position:absolute;left:calc(var(--H)*-2);top:calc(var(--H)*-2);width:calc(var(--H)*5);height:calc(var(--H)*5);transform:translateZ(-8px);
+  background-image:linear-gradient(#2de2ff30 1.5px,transparent 1.5px),linear-gradient(90deg,#2de2ff30 1.5px,transparent 1.5px);background-size:var(--s) var(--s);background-position:calc(var(--H)*2) calc(var(--H)*2);
+  -webkit-mask-image:radial-gradient(closest-side,#000 30%,transparent);mask-image:radial-gradient(closest-side,#000 30%,transparent);transition:opacity 1s}
 #board{position:absolute;inset:0;transform-style:preserve-3d;border-radius:10px;background:#060a1c;
   box-shadow:0 0 0 2px var(--cy),0 0 28px #2de2ff88,inset 0 0 30px #2de2ff22;
   background-image:linear-gradient(#2de2ff40 1px,transparent 1px),linear-gradient(90deg,#2de2ff40 1px,transparent 1px)}
-.stand{position:absolute;transform-origin:50% 100%;transform-style:preserve-3d;pointer-events:none}
+.stand{position:absolute;transform-origin:50% 100%;pointer-events:none;backface-visibility:hidden}
 #sign{left:calc(50% - var(--s)*4.5);width:calc(var(--s)*9);top:calc(var(--H) + var(--s)*9 - var(--s)*2.6);height:calc(var(--s)*2.6);
   transform:rotateX(-90deg);display:grid;place-items:center;text-align:center;font:900 calc(var(--s)*.95)/.95 Orbitron,sans-serif;letter-spacing:.04em}
-#sign b{display:block;color:#eaffff;-webkit-text-stroke:2px var(--cy);text-shadow:0 0 6px var(--cy),0 0 22px var(--cy),0 0 50px #2de2ff99}
-#sign b+b{color:#fff3e6;-webkit-text-stroke:2px var(--or);text-shadow:0 0 6px var(--or),0 0 22px var(--or),0 0 50px #ff8a1f99;font-size:1.15em}
+#sign b{display:block;color:#eaffff;-webkit-text-stroke:2px var(--cy);text-shadow:0 0 6px var(--cy),0 0 22px var(--cy)}
+#sign b+b{color:#fff3e6;-webkit-text-stroke:2px var(--or);text-shadow:0 0 6px var(--or),0 0 22px var(--or);font-size:1.15em}
 .crowd{height:calc(var(--s)*1.6);transform:rotateX(-90deg)}
 .crowd svg{width:100%;height:100%;overflow:visible}
-.crowd .p{animation:bob 1.1s ease-in-out infinite alternate}
-@keyframes bob{to{transform:translateY(-6px)}}
 .crowd,#sign{transition:opacity .9s}
 body.played .crowd,body.played #sign,body.intro .crowd{opacity:0}
 body.played #floor{opacity:.45}
 
 /* dados */
 .die{position:absolute;left:0;top:0;transform-style:preserve-3d}
-.shadow{position:absolute;inset:8%;border-radius:18%;background:#000a;filter:blur(4px);transform:translateZ(calc(var(--s)*-.5 + 1px))}
+.shadow{position:absolute;inset:8%;border-radius:18%;background:#000a;filter:blur(4px);transform:translateZ(calc(var(--s)*-.5 + 3px))}
 .die.sel .shadow{background:var(--cy);filter:blur(8px);opacity:.8}
 .cube{position:absolute;inset:0;transform-style:preserve-3d}
 .face{position:absolute;inset:0;backface-visibility:hidden}
@@ -120,7 +118,7 @@ body.done #stage{opacity:.35}
 .card button.pri{border-color:var(--or);background:#ff8a1f22;box-shadow:0 0 12px #ff8a1f66}
 @media(max-height:760px){.hint{display:none}}
 @media(max-width:400px){.bar button{padding:0 12px;font-size:12px}.bar{gap:7px}}
-@media(prefers-reduced-motion:reduce){.pop span{animation-duration:.01s}.crowd .p{animation:none}}
+@media(prefers-reduced-motion:reduce){.pop span{animation-duration:.01s}}
 </style>
 </head>
 <body class="intro">
@@ -211,7 +209,7 @@ function paint(d){
 }
 function layout(){
   const h=stage.clientHeight||300;
-  C=Math.floor(Math.min((innerWidth-40)/N,(h*1.25)/N,84));
+  C=Math.floor(Math.min((innerWidth-40)/N*.84,(h*1.25)/N,84)); // .84: el borde cercano se ve más ancho por la perspectiva
   board.style.backgroundSize=`${C}px ${C}px`;
   document.documentElement.style.setProperty('--s',C+'px');
   document.documentElement.style.setProperty('--H',N*C+'px');
@@ -349,7 +347,7 @@ function genLevel(lv){
   }
 }
 function startLevel(lv){
-  level=lv;const L=genLevel(lv);
+  level=lv;try{localStorage.setItem('jds-last',lv)}catch(e){}const L=genLevel(lv);
   target=L.target;par=L.par;limit=L.limit;start0=L.specs;load(start0.map(s=>({...s})));
   closeMenu();
 }
@@ -472,7 +470,7 @@ function playIntro(){
     {offset:.72,transform:'translate3d(0,0,-900px) rotateX(58deg)',easing:'ease-in-out'},
     {offset:1,transform:'translate3d(0,0,0) rotateX(34deg)'}],{duration:D});
   document.querySelectorAll('.crowd').forEach(c=>c.animate([{opacity:0},{opacity:0,offset:.47},{opacity:1,offset:.56},{opacity:1}],{duration:D}));
-  signAnim=$('sign').animate([{opacity:1},{opacity:1,offset:.45},{opacity:0,offset:.5},{opacity:0}],{duration:D});
+  signAnim=$('sign').animate([{opacity:1,visibility:'visible'},{opacity:1,visibility:'visible',offset:.42},{opacity:0,visibility:'visible',offset:.46},{opacity:0,visibility:'hidden',offset:.47},{opacity:0,visibility:'hidden'}],{duration:D});
   anim.onfinish=endIntro;
   Music.setDrums(false);
 }
@@ -480,7 +478,6 @@ function endIntro(){
   if(!introOn&&!document.body.classList.contains('intro'))return;
   introOn=false;document.body.classList.remove('intro');document.body.classList.add('played');
   Music.setDrums(true);
-  setTimeout(openMenu,500);
 }
 $('skip').onclick=()=>{if(anim)anim.finish();if(signAnim)signAnim.finish();endIntro()};
 $('replay').onclick=playIntro;
@@ -507,7 +504,8 @@ $('next').onclick=$('rMenu').onclick=openMenu;
 $('mClose').onclick=closeMenu;
 $('rNext').onclick=()=>startLevel(Math.min(MAXL,level+1));
 const ro=new ResizeObserver(layout);ro.observe(stage);
-layout();buildCrowd();startLevel(unlocked());
+let last=0;try{last=+localStorage.getItem('jds-last')||0}catch(e){}
+layout();buildCrowd();startLevel(last>=1&&last<=unlocked()?last:unlocked());
 world.style.transform='translate3d(0,40px,-4200px) rotateX(86deg)';introOn=true; // plano inicial bajo la pantalla de inicio
 $('start').onclick=()=>{$('start').hidden=true;world.style.transform='';Music.start();playIntro()};
 
