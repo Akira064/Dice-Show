@@ -1,10 +1,8 @@
 name: APK Android
 
-# Compila el APK del juego cada vez que cambia y lo publica en Releases
+# Compila el APK del juego y lo publica en Releases
+# Solo se compila a mano (pestaña Actions > APK Android > Run workflow)
 on:
-  push:
-    branches: [main]
-    paths: ["index.html", "android/**", ".github/workflows/apk.yml"]
   workflow_dispatch:
 
 permissions:
