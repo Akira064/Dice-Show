@@ -52,7 +52,7 @@ body.intro .ui{opacity:0;pointer-events:none}
 /* escena 3D: la cámara es #world */
 #stage{position:relative;z-index:0;flex:1;width:100%;display:grid;place-items:center;perspective:1000px;perspective-origin:50% 20%}
 #world{position:relative;width:var(--H);height:var(--H);transform-style:preserve-3d;transform:rotateX(34deg)}
-#floor{pointer-events:none;position:absolute;left:calc(var(--H)*-2);top:calc(var(--H)*-2);width:calc(var(--H)*5);height:calc(var(--H)*5);transform:translateZ(-8px);
+#floor{pointer-events:none;position:absolute;left:calc(var(--H)*-2);top:calc(var(--H)*-2);width:calc(var(--H)*5);height:calc(var(--H)*5);transform:translateZ(calc(var(--H)*-.4));
   background-image:linear-gradient(#2de2ff30 1.5px,transparent 1.5px),linear-gradient(90deg,#2de2ff30 1.5px,transparent 1.5px);background-size:var(--s) var(--s);background-position:calc(var(--H)*2) calc(var(--H)*2);
   -webkit-mask-image:radial-gradient(closest-side,#000 30%,transparent);mask-image:radial-gradient(closest-side,#000 30%,transparent);transition:opacity 1s}
 #board{position:absolute;inset:0;transform-style:preserve-3d;transform-origin:50% 50%;will-change:transform;border-radius:10px;background:#060a1c;
@@ -778,7 +778,7 @@ $('replay').onclick=playIntro;
 
 /* INCLINAR: al inclinar el móvil a izquierda o derecha el tablero gira un poco y se ven los laterales de los dados.
    También se puede girar arrastrando con dos dedos. Al soltar, vuelve despacio a su sitio. */
-const TILT_MAX=18;let tiltTarget=0,tiltNow=0,sensorOn=false,twoFinger=null;
+const TILT_MAX=32;let tiltTarget=0,tiltNow=0,sensorOn=false,twoFinger=null;
 function onOrient(e){
   if(e.gamma==null)return;sensorOn=true;
   const g=e.gamma, dz=3, v=Math.abs(g)<dz?0:(g-Math.sign(g)*dz)*.75;
@@ -789,7 +789,7 @@ function askMotion(){try{if(window.DeviceOrientationEvent&&typeof DeviceOrientat
 (function tiltLoop(){
   tiltNow+=(tiltTarget-tiltNow)*.12;
   if(Math.abs(tiltNow)<.02&&tiltTarget===0)tiltNow=0;
-  board.style.transform=tiltNow?`rotateZ(${(-tiltNow).toFixed(2)}deg) scale(${(1-Math.abs(tiltNow)*.006).toFixed(3)})`:'';
+  board.style.transform=tiltNow?`rotateY(${tiltNow.toFixed(2)}deg)`:'';   // se balancea de lado sobre el eje delante-atrás
   requestAnimationFrame(tiltLoop);
 })();
 const touches=new Map();
