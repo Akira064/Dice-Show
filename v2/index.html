@@ -234,7 +234,8 @@ body.done #stage{opacity:.35}
 .r-east,.r-west{width:calc(var(--s)*.85);height:var(--s);top:0}
 .r-east{left:100%;transform:scaleX(-1);-webkit-mask-image:linear-gradient(to right,transparent,#000 85%);mask-image:linear-gradient(to right,transparent,#000 85%)}
 .r-west{right:100%;transform:scaleX(-1);-webkit-mask-image:linear-gradient(to left,transparent,#000 85%);mask-image:linear-gradient(to left,transparent,#000 85%)}
-body.help-on .die.sel .refl{opacity:.62}
+body.help-refl .die.sel .refl{opacity:.62}
+.refl.hole-under{display:none}
 #helpBtn[aria-pressed=true]{border-color:#9dffb0;box-shadow:0 0 12px #5dff8a88}
 @media(max-height:760px){.hint{display:none}}
 @media(max-width:400px){.bar button{padding:0 12px;font-size:12px}.bar{gap:7px}}
@@ -339,6 +340,7 @@ function paint(d){
   let rf=d.el.querySelector('.refl-set');
   if(!rf){rf=document.createElement('div');rf.className='refl-set';d.el.prepend(rf)}
   rf.innerHTML=['north','south','east','west'].map(f=>`<div class="refl r-${f}"><div class="face v${v[f]}">${faceHTML(v[f],d.op)}</div></div>`).join('');
+  reflHoles(d);
   d.el.style.transform=`translate3d(${d.x*C}px,${d.y*C}px,${C/2}px)`;
 }
 function layout(){
@@ -362,6 +364,9 @@ function pop(d,txt){
   const p=document.createElement('div');p.className='pop';p.innerHTML='<span>'+txt+'</span>';
   d.el.appendChild(p);setTimeout(()=>p.remove(),950);
 }
+/* el reflejo no se dibuja sobre un agujero: ahí no hay suelo que refleje */
+const SIDE={north:[0,-1],south:[0,1],east:[1,0],west:[-1,0]};
+function reflHoles(d){try{for(const f in SIDE){const r=d.el.querySelector('.r-'+f);if(r)r.classList.toggle('hole-under',holes.has((d.x+SIDE[f][0])+','+(d.y+SIDE[f][1])))}}catch(e){}}
 function roll(d,dir){
   d.el.classList.add('rl');setTimeout(()=>d.el.classList.remove('rl'),(matchMedia('(prefers-reduced-motion: reduce)').matches?1:280)+40);
   return new Promise(res=>{
@@ -474,7 +479,7 @@ async function move(d,dir){
   const movedIds=[d.id], from=[d.x,d.y];lastAt=[d.x+DIRS[dir][0],d.y+DIRS[dir][1]];
   if(other){movedIds.push(other.id);await Promise.all([roll(other,dir),roll(d,dir)])}
   else await roll(d,dir);
-  if(TRAIL)makeHole(from[0],from[1]);
+  if(TRAIL){makeHole(from[0],from[1]);dice.forEach(reflHoles)}
   let fell=false;
   for(const m of other?[other,d]:[d])if(holes.has(m.x+','+m.y)){await fallIn(m);fell=fell||m===d}
   const r=fell?{total:0,combos:[]}:evaluate(dice,movedIds.filter(id=>dice.some(o=>o.id===id)),d.id);
@@ -836,9 +841,14 @@ $('skip').onclick=()=>{if(anim)anim.finish();if(signAnim)signAnim.finish();crowd
 $('replay').onclick=playIntro;
 
 /* AYUDA (botón): reflejo de las caras del dado elegido e inclinación del tablero con el móvil o dos dedos */
-let helpOn=false;try{helpOn=localStorage.getItem('jdv2-help')==='1'}catch(e){}
-function setHelp(on){helpOn=on;document.body.classList.toggle('help-on',on);const b=$('helpBtn');b.textContent='Ayuda: '+(on?'sí':'no');b.setAttribute('aria-pressed',on);
-  if(!on)tiltTarget=0;try{localStorage.setItem('jdv2-help',on?'1':'0')}catch(e){}}
+/* ayuda en 4 pasos con el mismo botón: no → caras → inclinar → caras + inclinar → no */
+const HELP_TXT=['Ayuda: no','Ayuda: caras','Ayuda: inclinar','Ayuda: las dos'];
+let helpMode=0;try{helpMode=(+localStorage.getItem('jdv2-help')||0)%4}catch(e){}
+let helpOn=false;   // inclinación activa
+function setHelp(m){helpMode=m;helpOn=!!(m&2);
+  document.body.classList.toggle('help-refl',!!(m&1));
+  const b=$('helpBtn');b.textContent=HELP_TXT[m];b.setAttribute('aria-pressed',m>0);
+  if(!helpOn)tiltTarget=0;try{localStorage.setItem('jdv2-help',m)}catch(e){}}
 /* INCLINAR: al inclinar el móvil a izquierda o derecha el tablero gira un poco y se ven los laterales de los dados.
    También se puede girar arrastrando con dos dedos. Al soltar, vuelve despacio a su sitio. */
 const TILT_MAX=32;let tiltTarget=0,tiltNow=0,sensorOn=false,twoFinger=null;
@@ -862,8 +872,8 @@ addEventListener('pointermove',e=>{if(!touches.has(e.pointerId))return;touches.s
   if(twoFinger&&touches.size>=2){const xs=[...touches.values()];const x=(xs[0]+xs[1])/2;tiltTarget=Math.max(-TILT_MAX,Math.min(TILT_MAX,twoFinger.a0+(x-twoFinger.x0)*.15))}});
 const endTouch=e=>{touches.delete(e.pointerId);if(twoFinger&&touches.size<2){twoFinger=null;if(!sensorOn)tiltTarget=0;st=null}};
 addEventListener('pointerup',endTouch,true);addEventListener('pointercancel',endTouch,true);
-setHelp(helpOn);
-$('helpBtn').onclick=()=>{askMotion();setHelp(!helpOn)};
+setHelp(helpMode);
+$('helpBtn').onclick=()=>{const n=(helpMode+1)%4;if(n&2)askMotion();setHelp(n)};
 let st=null;
 stage.addEventListener('pointerdown',e=>{
   const el=document.elementFromPoint(e.clientX,e.clientY)?.closest('.die');
