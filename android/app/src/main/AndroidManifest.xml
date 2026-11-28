@@ -3,7 +3,7 @@
     <!-- Solo para cargar las fuentes de neón; el juego funciona sin conexión -->
     <uses-permission android:name="android.permission.INTERNET" />
     <application
-        android:label="Just Dice Show"
+        android:label="@string/app_name"
         android:icon="@mipmap/ic_launcher"
         android:allowBackup="true"
         android:hardwareAccelerated="true"

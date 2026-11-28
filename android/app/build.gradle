@@ -4,7 +4,8 @@ android {
     namespace "io.github.akira064.diceshow"
     compileSdk 34
     defaultConfig {
-        applicationId "io.github.akira064.diceshow"
+        applicationId = project.findProperty("appId") ?: "io.github.akira064.diceshow"
+        resValue "string", "app_name", (project.findProperty("appName") ?: "Just Dice Show")
         minSdk 24
         targetSdk 34
         versionCode = Integer.parseInt(System.getenv("GITHUB_RUN_NUMBER") ?: "1")

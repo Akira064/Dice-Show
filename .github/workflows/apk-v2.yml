@@ -1,0 +1,54 @@
+name: APK Android v2
+
+# Compila el APK de la versión 2 (carpeta v2/) y lo publica en Releases
+on:
+  push:
+    branches: [main]
+    paths: ["v2/index.html"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
+
+      - name: Copiar el juego dentro de la app
+        run: |
+          mkdir -p android/app/src/main/assets/www
+          cp v2/index.html android/app/src/main/assets/www/index.html
+
+      - name: Compilar
+        working-directory: android
+        run: gradle assembleDebug --no-daemon --stacktrace -PappId=io.github.akira064.diceshow.v2 "-PappName=Just Dice Show 2"
+
+      - name: Preparar APK
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk JustDiceShow2.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: JustDiceShow2-apk
+          path: JustDiceShow2.apk
+
+      - name: Publicar en Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v2-apk-${{ github.run_number }}
+          name: Just Dice Show 2 (APK ${{ github.run_number }})
+          body: |
+            Descarga **JustDiceShow2.apk** desde el móvil e instálalo
+            (Android pedirá permiso para instalar apps de fuera de Google Play).
+          files: JustDiceShow2.apk
+          make_latest: true
